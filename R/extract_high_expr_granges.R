@@ -1,12 +1,11 @@
-library(rtracklayer)
 library(SNPRelate)
 
-high_expr_genes_ranges = readRDS("data/high_expr_genes.rds")
+#high_expr_genes_ranges = readRDS("data/high_expr_genes.rds")
 
 plink_files = list(
-  bed = "/mnt/provinceCluster/freeze5.allchr.allfam.bed",
-  fam = "/mnt/provinceCluster/freeze5.allchr.allfam.fam",
-  bim = "/mnt/provinceCluster/freeze5.allchr.allfam.bim"
+  bed = "/mnt/scratch/llfs/plink_files/freeze5.allchr.allfam.bed",
+  fam = "/mnt/scratch/llfs/plink_files/freeze5.allchr.allfam.fam",
+  bim = "/mnt/scratch/llfs/plink_files/freeze5.allchr.allfam.bim"
 )
 
 

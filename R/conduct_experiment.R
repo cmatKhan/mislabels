@@ -136,4 +136,20 @@ conduct_experiment = function(db_path, pileup_database_dir, sample, filename_map
   apply(filename_map, 1, get_diff)
 }
 
+# run an experiment example:
+# gene_ranges = readRDS(high_expr_genes)
+# map(sample_list, ~highly_expressed_gene_virtual_table(gene_ranges,
+#                                                       here("data/sample_genotype_db.sqlite"),
+#                                                       .))
+# sample_list = paste0("sample", seq(1,4))
+#
+# filename_map = read_csv(here("data/filename_id_subject_mislabel_map.csv")) %>%
+#   mutate(filename =
+#            paste0(
+#              str_remove_all(filename, "_visit|.markdup.sorted.pileup"),
+#              '.sqlite')) %>%
+#   mutate(filename = str_replace(filename, "_", "."))
+#
+#
+# experiment_res = map(sample_list, conduct_experiment, filename_map)
 

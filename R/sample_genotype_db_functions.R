@@ -81,6 +81,8 @@ add_genotype_table = function(vcf_path, db_path){
 #' @inheritParams create_sample_geno_db
 #' @param highly_expressed_gene_ranges a GRangeList of regions over which to
 #'   create a virtual table (a subset of the entire table)
+#' @param sample_viewname name of the sample view table in the db
+#' @param tablename name of the table from which to make the sample view
 #'
 #'
 #'@export

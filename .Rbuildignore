@@ -4,3 +4,4 @@
 R/playground.R
 src/ImplementingUsefulAlgorithms
 ^local_data$
+^LICENSE\.md$

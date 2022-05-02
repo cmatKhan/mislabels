@@ -331,16 +331,11 @@ conduct experiment, show table
 
 # conclusion
 
+
+
 ```{r}
-gene_ranges = readRDS(here("data/high_expr_genes.rds"))
+
 sample_list = paste0("sample", seq(1,4))
-
-map(sample_list, ~highly_expressed_gene_virtual_table(gene_ranges,
-                                    here("data/sample_genotype_db.sqlite"),
-                                    .))
-```
-
-```{r}
 
 filename_map = read_csv(here("data/filename_id_subject_mislabel_map.csv")) %>%
   mutate(filename = 
@@ -350,9 +345,6 @@ filename_map = read_csv(here("data/filename_id_subject_mislabel_map.csv")) %>%
   mutate(filename = str_replace(filename, "_", "."))
 
 
-```
-
-```{r}
 experiment_res = map(sample_list, conduct_experiment, filename_map)
 ```
 

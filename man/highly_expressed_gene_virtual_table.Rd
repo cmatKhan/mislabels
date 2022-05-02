@@ -17,6 +17,10 @@ create a virtual table (a subset of the entire table)}
 
 \item{db_path}{a path, eg /path/to/sample_geno_db.sqlite, to where you'd like
 to create the sqlite database file}
+
+\item{sample_viewname}{name of the sample view table in the db}
+
+\item{tablename}{name of the table from which to make the sample view}
 }
 \description{
 create virtual table of only highly expressed gene regions in the db

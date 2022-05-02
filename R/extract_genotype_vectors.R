@@ -95,6 +95,7 @@ rnaseq_vector = function(db_path, snp_df, tablename = "rnaseq_pileup"){
 
   sql = sprintf("SELECT * FROM %s WHERE %s", tablename, where_clause)
 
+  message(sprintf("getting pileup vector from: %s", db_path))
   con = dbConnect(RSQLite::SQLite(), db_path)
 
   df = dbGetQuery(con, sql)

@@ -109,6 +109,7 @@ compare_vectors = function(genome_vector, pileup_vector, equivalence_mat){
 #'
 #' @export
 conduct_experiment = function(db_path, pileup_database_dir, sample, filename_map){
+
   snp_df = sample_snp_ranges(db_path, sample)
 
   sample_genome_vectors = genome_vectors(db_path,
@@ -137,7 +138,7 @@ conduct_experiment = function(db_path, pileup_database_dir, sample, filename_map
 }
 
 # run an experiment example:
-# gene_ranges = readRDS(high_expr_genes)
+#   gene_ranges = readRDS(high_expr_genes)
 # map(sample_list, ~highly_expressed_gene_virtual_table(gene_ranges,
 #                                                       here("data/sample_genotype_db.sqlite"),
 #                                                       .))
@@ -153,3 +154,13 @@ conduct_experiment = function(db_path, pileup_database_dir, sample, filename_map
 #
 # experiment_res = map(sample_list, conduct_experiment, filename_map)
 
+# sample_genotype_db_path = "/home/oguzkhan/class/bioseq/local_data/sample_genotype_db.sqlite"
+#
+# sample_list = paste0("sample", seq(1,4))
+#
+# experiment_res =
+#   map(sample_list,
+#       ~conduct_experiment(sample_genotype_db_path,
+#                           "/home/oguzkhan/class/bioseq/local_data/mapqOver10_no_secondary_databases",
+#                           .,
+#                           filename_id_subject_mislabel_map))

@@ -406,23 +406,20 @@ out_list1 = map(sample_genome_vectors, compare_vectors, pileup_vector, dist_mat)
 names(out_list1) = names(sample_genome_vectors)
 ```
 
+
+
 ```{r}
-highly_expressed_gene_virtual_table(gene_ranges,
-                                    here("data/sample_genotype_db.sqlite"),
-                                    "sample4")
+sample_genotype_db_path = "/home/oguzkhan/class/bioseq/local_data/sample_genotype_db.sqlite"
+ 
+sample_list = paste0("sample", seq(1,4))
+ 
+experiment_res = 
+  map(sample_list, 
+      ~conduct_experiment(sample_genotype_db_path,
+                          "/home/oguzkhan/class/bioseq/local_data/mapqOver10_no_secondary_databases",
+                         .,
+                         filename_id_subject_mislabel_map))
 
-sample = 'sample4'
-
-snp_df = sample_snp_ranges(here("data/sample_genotype_db.sqlite"), sample)
-
-sample_genome_vectors = genome_vectors(here("data/sample_genotype_db.sqlite"), 
-                                       sample)
-
-pileup_vector = rnaseq_vector(here("data/10367282.2.pileup"), snp_df)
-
-dist_mat = equivalence_class_dist_matrix(lenient = FALSE)
-
-out_list4 = map(sample_genome_vectors, compare_vectors, pileup_vector, dist_mat)
-names(out_list4) = names(sample_genome_vectors)
 ```
+
 

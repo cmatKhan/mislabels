@@ -1048,23 +1048,16 @@ ON rnaseq_pileup (chr, pos);"</span><span class="op">)</span>
 <span class="va">out_list1</span> <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">sample_genome_vectors</span>, <span class="va">compare_vectors</span>, <span class="va">pileup_vector</span>, <span class="va">dist_mat</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">out_list1</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">sample_genome_vectors</span><span class="op">)</span></code></pre></div>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/highly_expressed_gene_virtual_table.html">highly_expressed_gene_virtual_table</a></span><span class="op">(</span><span class="va">gene_ranges</span>,
-                                    <span class="fu">here</span><span class="op">(</span><span class="st">"data/sample_genotype_db.sqlite"</span><span class="op">)</span>,
-                                    <span class="st">"sample4"</span><span class="op">)</span>
-
-<span class="va">sample</span> <span class="op">=</span> <span class="st">'sample4'</span>
-
-<span class="va">snp_df</span> <span class="op">=</span> <span class="fu"><a href="../reference/sample_snp_ranges.html">sample_snp_ranges</a></span><span class="op">(</span><span class="fu">here</span><span class="op">(</span><span class="st">"data/sample_genotype_db.sqlite"</span><span class="op">)</span>, <span class="va">sample</span><span class="op">)</span>
-
-<span class="va">sample_genome_vectors</span> <span class="op">=</span> <span class="fu"><a href="../reference/genome_vectors.html">genome_vectors</a></span><span class="op">(</span><span class="fu">here</span><span class="op">(</span><span class="st">"data/sample_genotype_db.sqlite"</span><span class="op">)</span>, 
-                                       <span class="va">sample</span><span class="op">)</span>
-
-<span class="va">pileup_vector</span> <span class="op">=</span> <span class="fu"><a href="../reference/rnaseq_vector.html">rnaseq_vector</a></span><span class="op">(</span><span class="fu">here</span><span class="op">(</span><span class="st">"data/10367282.2.pileup"</span><span class="op">)</span>, <span class="va">snp_df</span><span class="op">)</span>
-
-<span class="va">dist_mat</span> <span class="op">=</span> <span class="fu"><a href="../reference/equivalence_class_dist_matrix.html">equivalence_class_dist_matrix</a></span><span class="op">(</span>lenient <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-
-<span class="va">out_list4</span> <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">sample_genome_vectors</span>, <span class="va">compare_vectors</span>, <span class="va">pileup_vector</span>, <span class="va">dist_mat</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">out_list4</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">sample_genome_vectors</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="va">sample_genotype_db_path</span> <span class="op">=</span> <span class="st">"/home/oguzkhan/class/bioseq/local_data/sample_genotype_db.sqlite"</span>
+ 
+<span class="va">sample_list</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"sample"</span>, <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">4</span><span class="op">)</span><span class="op">)</span>
+ 
+<span class="va">experiment_res</span> <span class="op">=</span> 
+  <span class="fu">map</span><span class="op">(</span><span class="va">sample_list</span>, 
+      <span class="op">~</span><span class="fu"><a href="../reference/conduct_experiment.html">conduct_experiment</a></span><span class="op">(</span><span class="va">sample_genotype_db_path</span>,
+                          <span class="st">"/home/oguzkhan/class/bioseq/local_data/mapqOver10_no_secondary_databases"</span>,
+                         <span class="va">.</span>,
+                         <span class="va">filename_id_subject_mislabel_map</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 </div>
 </div>
   </div>

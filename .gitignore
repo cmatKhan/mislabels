@@ -5,3 +5,4 @@ data
 .httr-oauth
 .DS_Store
 inst/doc
+local_data

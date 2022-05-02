@@ -1,3 +1,6 @@
 ^finalProject\.Rproj$
 ^\.Rproj\.user$
 ^\.github$
+R/playground.R
+src/ImplementingUsefulAlgorithms
+local_data

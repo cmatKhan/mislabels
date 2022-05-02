@@ -1,13 +1,25 @@
-library(SNPRelate)
+#'
+#' Create a plink region filter from GRangeList
+#'
+#' @import GenomicFeatures
+#' @importFrom tibble as_tibble
+#' @importFrom dplyr filter select
+#'
+#' @param grl a GRangeList object. must have type with at least factor level
+#'   gene and seqnames, start, end and gene_id
+#'
+#' @return a dataframe which may be written out to act as a plink filter
+#'
+#' @export
+create_plink_region_filter = function(grl){
+  grl %>%
+    as_tibble() %>%
+    filter(type == "gene") %>%
+    dplyr::select(seqnames, start, end, gene_id) %>%
+    mutate(seqnames = str_remove(seqnames, "chr"))
+}
 
-#high_expr_genes_ranges = readRDS("data/high_expr_genes.rds")
-
-plink_files = list(
-  bed = "/mnt/scratch/llfs/plink_files/freeze5.allchr.allfam.bed",
-  fam = "/mnt/scratch/llfs/plink_files/freeze5.allchr.allfam.fam",
-  bim = "/mnt/scratch/llfs/plink_files/freeze5.allchr.allfam.bim"
-)
-
-
-
-snpgdsBED2GDS(plink_files$bed, plink_files$fam, plink_files$bim, "data/allfam.gds")
+# hamming dist -- exact match to genome. RNAseq reads for heterozygous should
+# be ~50/50.
+# Question: do we expect there to be 50/50, or maybe a 3rd, to be expressed
+# on both allele?

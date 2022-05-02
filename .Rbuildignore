@@ -3,4 +3,4 @@
 ^\.github$
 R/playground.R
 src/ImplementingUsefulAlgorithms
-local_data
+^local_data$

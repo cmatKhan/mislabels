@@ -256,26 +256,58 @@ section.
 Revising the Rsamtools pileup params to the following:
 
 ```{r}
-  p_param =
-    PileupParam(max_depth            = 250, 
-                min_nucleotide_depth = 5,
-                distinguish_strand   = FALSE,
-                min_base_quality     = 10)
+p_param =
+  PileupParam(max_depth            = 250, 
+              min_nucleotide_depth = 5,
+              distinguish_strand   = FALSE,
+              min_base_quality     = 10)
 
 ```
+
 Which reduces the `max_depth`, since none of the positions had more than 95 
 reads, and removes the MAPQ filter, results in a new pileup vector (same sample 
 as the one above) which looks like this:
 
-```
+and reduces the number of 'Uncertain' positions by _____
+
+In thinking about this further, I realized that there is also no reason to 
+exclude secondary alignments which align as well as the primary alignment, since 
+we aren't interested in the actual count. So, I also performed the pileup using 
+the following paramter:
+
+```{r}
+sbp = 
+  ScanBamParam(
+    flag = 
+      scanBamFlag(isProperPair                = TRUE, 
+                  # accept both primary and secondary alignments which align 
+                  # as well as the primary
+                  isSecondaryAlignment        = TRUE,
+                  # But exclude poor secdonary alignments
+                  isSupplementaryAlignment    = FALSE,
+                  # only accept alignments which pass all aligner quality 
+                  # metrics
+                  isNotPassingQualityControls = FALSE))
+
+p_param =
+  PileupParam(max_depth            = 250, 
+              min_nucleotide_depth = 5,
+              distinguish_strand   = FALSE,
+              min_base_quality     = 10)
 
 ```
-and reduces the number of 'Uncertain' positions by _____
+
 ### Distance
 
 The hamming distance between an RNA sequence library SNP vector and an 
 individual's genome SNP vector is calculated using one of the two 'scoring 
-matricies'.
+matrices'. Strict only accepts exact matches where all of the homozygous 
+bases match each other, and homozygous match in either order, i.e. A/T == T/A.  
+
+The lenient scoring matrix, on the other hand, allows matches between homozygous 
+and both homozygous genotypes, and also heterozygous genotypes which include the 
+same base pair. For instance, A matches A/A, and any heterozygous genotype 
+with A.
 
 ```{r eval = TRUE, echo=FALSE}
 knitr::kable(equivalence_class_dist_matrix(lenient = FALSE), 
@@ -288,6 +320,60 @@ knitr::kable(equivalence_class_dist_matrix(lenient = TRUE),
 ```
 
 # Results
+
+Number of uncertains in each of the three data sets
+
+How many genome snp vectors are exactly the same. Histogram of differences
+
+Same thing for pileups
+
+conduct experiment, show table
+
+# conclusion
+
+```{r}
+gene_ranges = readRDS(here("data/high_expr_genes.rds"))
+sample_list = paste0("sample", seq(1,4))
+
+map(sample_list, ~highly_expressed_gene_virtual_table(gene_ranges,
+                                    here("data/sample_genotype_db.sqlite"),
+                                    .))
+```
+
+```{r}
+
+filename_map = read_csv(here("data/filename_id_subject_mislabel_map.csv")) %>%
+  mutate(filename = 
+           paste0(
+             str_remove_all(filename, "_visit|.markdup.sorted.pileup"),
+             '.sqlite')) %>%
+  mutate(filename = str_replace(filename, "_", "."))
+
+
+```
+
+```{r}
+experiment_res = map(sample_list, conduct_experiment, filename_map)
+```
+
+# References
+
+https://seqqc.wordpress.com/2015/03/10/calculate-nucelotide-frequency-with-rsamtools-pileup/
+
+# Misc
+
+
+## mislabels
+
+```
+4307 , 1294 , 11221 , 20686 , 20903 , 26715 , 21389 , 25785 , 2333 , 6190 , 6099 , 11185 
+```
+
+## supposedly correctly labeled
+
+```
+31013 , 1597 , 8161 , 5582 , 15076 , 809 , 15147 , 14639 , 26794 , 13822, 2020,14444 
+```
 
 ```{r}
   con = dbConnect(RSQLite::SQLite(), "data/10367282.1.pileup")
@@ -348,46 +434,3 @@ out_list4 = map(sample_genome_vectors, compare_vectors, pileup_vector, dist_mat)
 names(out_list4) = names(sample_genome_vectors)
 ```
 
-```{r}
-gene_ranges = readRDS(here("data/high_expr_genes.rds"))
-sample_list = paste0("sample", seq(1,4))
-
-map(sample_list, ~highly_expressed_gene_virtual_table(gene_ranges,
-                                    here("data/sample_genotype_db.sqlite"),
-                                    .))
-```
-
-```{r}
-
-filename_map = read_csv(here("data/filename_id_subject_mislabel_map.csv")) %>%
-  mutate(filename = 
-           paste0(
-             str_remove_all(filename, "_visit|.markdup.sorted.pileup"),
-             '.sqlite')) %>%
-  mutate(filename = str_replace(filename, "_", "."))
-
-
-```
-
-```{r}
-experiment_res = map(sample_list, conduct_experiment, filename_map)
-```
-
-# References
-
-https://seqqc.wordpress.com/2015/03/10/calculate-nucelotide-frequency-with-rsamtools-pileup/
-
-# Misc
-
-
-## mislabels
-
-```
-4307 , 1294 , 11221 , 20686 , 20903 , 26715 , 21389 , 25785 , 2333 , 6190 , 6099 , 11185 
-```
-
-## supposedly correctly labeled
-
-```
-31013 , 1597 , 8161 , 5582 , 15076 , 809 , 15147 , 14639 , 26794 , 13822, 2020,14444 
-```

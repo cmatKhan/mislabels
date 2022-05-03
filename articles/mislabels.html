@@ -50,12 +50,28 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
+      <a href="../articles/ClusterScripts.html">ClusterScripts</a>
+    </li>
+    <li>
+      <a href="../articles/ConductExperiment.html">ConductExperiment</a>
+    </li>
+    <li>
+      <a href="../articles/difference_between_genomes.html">difference_between_genomes</a>
+    </li>
+    <li>
       <a href="../articles/mislabels.html">mislabels</a>
     </li>
   </ul>
 </li>
       </ul>
-<ul class="nav navbar-nav navbar-right"></ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+  <a href="https://github.com/cmatKhan/mislabels/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 <!--/.nav-collapse -->
   </div>
@@ -71,7 +87,7 @@
       <h1 data-toc-skip>mislabels</h1>
             
       
-      
+      <small class="dont-index">Source: <a href="https://github.com/cmatKhan/mislabels/blob/HEAD/vignettes/mislabels.Rmd" class="external-link"><code>vignettes/mislabels.Rmd</code></a></small>
       <div class="hidden name"><code>mislabels.Rmd</code></div>
 
     </div>
@@ -79,7 +95,19 @@
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">finalProject</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/cmatKhan/mislabels" class="external-link">finalProject</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com" class="external-link">patchwork</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">gridExtra</span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span>
+<span class="co">#&gt; ── <span style="font-weight: bold;">Attaching packages</span> ─────────────────────────────────────── tidyverse 1.3.1 ──</span>
+<span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">ggplot2</span> 3.3.6     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">purrr  </span> 0.3.4</span>
+<span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tibble </span> 3.1.7     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">dplyr  </span> 1.0.9</span>
+<span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tidyr  </span> 1.2.0     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">stringr</span> 1.4.0</span>
+<span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">readr  </span> 2.1.2     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">forcats</span> 0.5.1</span>
+<span class="co">#&gt; ── <span style="font-weight: bold;">Conflicts</span> ────────────────────────────────────────── tidyverse_conflicts() ──</span>
+<span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #0000BB;">dplyr</span>::<span style="color: #00BB00;">combine()</span> masks <span style="color: #0000BB;">gridExtra</span>::combine()</span>
+<span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #0000BB;">dplyr</span>::<span style="color: #00BB00;">filter()</span>  masks <span style="color: #0000BB;">stats</span>::filter()</span>
+<span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #0000BB;">dplyr</span>::<span style="color: #00BB00;">lag()</span>     masks <span style="color: #0000BB;">stats</span>::lag()</span></code></pre></div>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
@@ -122,13 +150,13 @@ WHERE (chr IS 13.0 AND bp BETWEEN 48975912 AND 49209779 OR
 <span class="co"># and tags and aid in filtering the alignments</span>
 
 <span class="va">sbp</span> <span class="op">=</span> 
-  <span class="fu">ScanBamParam</span><span class="op">(</span>
+  <span class="fu"><a href="https://rdrr.io/pkg/Rsamtools/man/ScanBamParam-class.html" class="external-link">ScanBamParam</a></span><span class="op">(</span>
     flag <span class="op">=</span> 
                   <span class="co"># only count reads for which both R1 and R2 align properly </span>
                   <span class="co"># (these are reverse strand library, so R1 must align to the </span>
                   <span class="co"># reverse complement of the reference, while R2 aligns on the </span>
                   <span class="co"># forward strand with some specified overlap)</span>
-      <span class="fu">scanBamFlag</span><span class="op">(</span>isProperPair                <span class="op">=</span> <span class="cn">TRUE</span>, 
+      <span class="fu"><a href="https://rdrr.io/pkg/Rsamtools/man/ScanBamParam-class.html" class="external-link">scanBamFlag</a></span><span class="op">(</span>isProperPair                <span class="op">=</span> <span class="cn">TRUE</span>, 
                   <span class="co"># only accept primary alignments</span>
                   isSecondaryAlignment        <span class="op">=</span> <span class="cn">FALSE</span>,
                   isSupplementaryAlignment    <span class="op">=</span> <span class="cn">FALSE</span>,
@@ -202,22 +230,13 @@ Figure 1: An RNAseq library SNP locations
 </div>
 <p>The vertical bar in figure 1 is over the first “Uncertain” locus in the alignment from which the pileup vector above originates. The detail box in the image gives details on one of the reads. It says the following: The read is 121 base pairs long. SAM flag 99 means that this read, along with its pair, are both mapped (the library is unstranded, so in this case, R1 maps to the forward strand while R2 maps to the reverse strand). This location is the primary alignment for this read, and it aligns without gaps (Cigar 121M means 121 matches). There is no soft clipping at the ends of the read and the mate is also mapped.</p>
 <p>However, the mapping quality (MAPQ) is 1. That indicates that this alignment may occur with ~70% chance in other locations in the genome. And, this is the case: the flag NH:3 means that there are 3 other alignments which may be as good as this one.</p>
-<p>In looking more closely at this – which I am doing as I write this report – I realized that the more stringent MAPQ filter on the pileup step is likely not necessary. Rather, I should only set a base_quality score (currently the threshold I have set is also 10. The base quality score of this particular base is 37). For quantifying the counts over a given locus, it makes more sense to have a more stringent MAPQ threshold. However, for this purpose, it does not. A high quality multi-map does provide evidence of a given base’s identity. In fact, it increases confidence. I will address this further in the Conclusions section.</p>
-<p>Revising the Rsamtools pileup params to the following:</p>
+<p>In thinking about this, I realized that the more stringent MAPQ filter on the pileup step, while reasonable for something like RNA sequencing, is not necessary for this purpose. A high quality multi-map does provide evidence of a given base’s identity. In fact, it increases confidence. Thus, I should only set a base_quality score, and accept both primary and secondary mappings which map as well as the primary mapping.</p>
+<p>So, I generated a second data set with the revised parameters below:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">p_param</span> <span class="op">=</span>
-  <span class="fu">PileupParam</span><span class="op">(</span>max_depth            <span class="op">=</span> <span class="fl">250</span>, 
-              min_nucleotide_depth <span class="op">=</span> <span class="fl">5</span>,
-              distinguish_strand   <span class="op">=</span> <span class="cn">FALSE</span>,
-              min_base_quality     <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></code></pre></div>
-<p>Which reduces the <code>max_depth</code>, since none of the positions had more than 95 reads, and removes the MAPQ filter, results in a new pileup vector (same sample as the one above) which looks like this:</p>
-<p>and reduces the number of ‘Uncertain’ positions by _____</p>
-<p>In thinking about this further, I realized that there is also no reason to exclude secondary alignments which align as well as the primary alignment, since we aren’t interested in the actual count. So, I also performed the pileup using the following paramter:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">sbp</span> <span class="op">=</span> 
-  <span class="fu">ScanBamParam</span><span class="op">(</span>
+  <span class="fu"><a href="https://rdrr.io/pkg/Rsamtools/man/ScanBamParam-class.html" class="external-link">ScanBamParam</a></span><span class="op">(</span>
     flag <span class="op">=</span> 
-      <span class="fu">scanBamFlag</span><span class="op">(</span>isProperPair                <span class="op">=</span> <span class="cn">TRUE</span>, 
+      <span class="fu"><a href="https://rdrr.io/pkg/Rsamtools/man/ScanBamParam-class.html" class="external-link">scanBamFlag</a></span><span class="op">(</span>isProperPair                <span class="op">=</span> <span class="cn">TRUE</span>, 
                   <span class="co"># accept both primary and secondary alignments which align </span>
                   <span class="co"># as well as the primary</span>
                   isSecondaryAlignment        <span class="op">=</span> <span class="cn">TRUE</span>,
@@ -228,773 +247,87 @@ Figure 1: An RNAseq library SNP locations
                   isNotPassingQualityControls <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span>
 
 <span class="va">p_param</span> <span class="op">=</span>
-  <span class="fu">PileupParam</span><span class="op">(</span>max_depth            <span class="op">=</span> <span class="fl">250</span>, 
+  <span class="fu"><a href="https://rdrr.io/pkg/Rsamtools/man/pileup.html" class="external-link">PileupParam</a></span><span class="op">(</span>max_depth            <span class="op">=</span> <span class="fl">250</span>, 
               min_nucleotide_depth <span class="op">=</span> <span class="fl">5</span>,
               distinguish_strand   <span class="op">=</span> <span class="cn">FALSE</span>,
               min_base_quality     <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></code></pre></div>
+<p>The result is significantly fewer ‘Uncertain’ base locations in the RNA sequence library pileups.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">filter_comparison_plt</span></code></pre></div>
+<p><img src="mislabels_files/figure-html/unnamed-chunk-5-1.png" width="960"></p>
 </div>
 <div class="section level4">
 <h4 id="distance">Distance<a class="anchor" aria-label="anchor" href="#distance"></a>
 </h4>
 <p>The hamming distance between an RNA sequence library SNP vector and an individual’s genome SNP vector is calculated using one of the two ‘scoring matrices’. Strict only accepts exact matches where all of the homozygous bases match each other, and homozygous match in either order, i.e. A/T == T/A.</p>
 <p>The lenient scoring matrix, on the other hand, allows matches between homozygous and both homozygous genotypes, and also heterozygous genotypes which include the same base pair. For instance, A matches A/A, and any heterozygous genotype with A.</p>
-<table class="table">
-<caption>Strict Scoring Matrix</caption>
-<thead><tr class="header">
-<th align="left"></th>
-<th align="right">A</th>
-<th align="right">T</th>
-<th align="right">G</th>
-<th align="right">C</th>
-<th align="right">A/T</th>
-<th align="right">T/A</th>
-<th align="right">A/G</th>
-<th align="right">G/A</th>
-<th align="right">A/C</th>
-<th align="right">C/A</th>
-<th align="right">T/G</th>
-<th align="right">G/T</th>
-<th align="right">T/C</th>
-<th align="right">C/T</th>
-<th align="right">G/C</th>
-<th align="right">C/G</th>
-<th align="right">Uncertain</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="left">A</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">NA</td>
-</tr>
-<tr class="even">
-<td align="left">T</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">NA</td>
-</tr>
-<tr class="odd">
-<td align="left">G</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">NA</td>
-</tr>
-<tr class="even">
-<td align="left">C</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">NA</td>
-</tr>
-<tr class="odd">
-<td align="left">A/T</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">NA</td>
-</tr>
-<tr class="even">
-<td align="left">T/A</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">NA</td>
-</tr>
-<tr class="odd">
-<td align="left">A/G</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">NA</td>
-</tr>
-<tr class="even">
-<td align="left">G/A</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">NA</td>
-</tr>
-<tr class="odd">
-<td align="left">A/C</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">NA</td>
-</tr>
-<tr class="even">
-<td align="left">C/A</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">NA</td>
-</tr>
-<tr class="odd">
-<td align="left">T/G</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">NA</td>
-</tr>
-<tr class="even">
-<td align="left">G/T</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">NA</td>
-</tr>
-<tr class="odd">
-<td align="left">T/C</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">NA</td>
-</tr>
-<tr class="even">
-<td align="left">C/T</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">NA</td>
-</tr>
-<tr class="odd">
-<td align="left">G/C</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">NA</td>
-</tr>
-<tr class="even">
-<td align="left">C/G</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">NA</td>
-</tr>
-<tr class="odd">
-<td align="left">Uncertain</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-</tr>
-</tbody>
-</table>
-<table class="table">
-<caption>Lenient Scoring Matrix</caption>
-<thead><tr class="header">
-<th align="left"></th>
-<th align="right">A</th>
-<th align="right">T</th>
-<th align="right">G</th>
-<th align="right">C</th>
-<th align="right">A/T</th>
-<th align="right">T/A</th>
-<th align="right">A/G</th>
-<th align="right">G/A</th>
-<th align="right">A/C</th>
-<th align="right">C/A</th>
-<th align="right">T/G</th>
-<th align="right">G/T</th>
-<th align="right">T/C</th>
-<th align="right">C/T</th>
-<th align="right">G/C</th>
-<th align="right">C/G</th>
-<th align="right">Uncertain</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="left">A</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">NA</td>
-</tr>
-<tr class="even">
-<td align="left">T</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">NA</td>
-</tr>
-<tr class="odd">
-<td align="left">G</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">NA</td>
-</tr>
-<tr class="even">
-<td align="left">C</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">NA</td>
-</tr>
-<tr class="odd">
-<td align="left">A/T</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">NA</td>
-</tr>
-<tr class="even">
-<td align="left">T/A</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">NA</td>
-</tr>
-<tr class="odd">
-<td align="left">A/G</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">NA</td>
-</tr>
-<tr class="even">
-<td align="left">G/A</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">NA</td>
-</tr>
-<tr class="odd">
-<td align="left">A/C</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">NA</td>
-</tr>
-<tr class="even">
-<td align="left">C/A</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">NA</td>
-</tr>
-<tr class="odd">
-<td align="left">T/G</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">NA</td>
-</tr>
-<tr class="even">
-<td align="left">G/T</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">NA</td>
-</tr>
-<tr class="odd">
-<td align="left">T/C</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">NA</td>
-</tr>
-<tr class="even">
-<td align="left">C/T</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">NA</td>
-</tr>
-<tr class="odd">
-<td align="left">G/C</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">NA</td>
-</tr>
-<tr class="even">
-<td align="left">C/G</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">NA</td>
-</tr>
-<tr class="odd">
-<td align="left">Uncertain</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-</tr>
-</tbody>
-</table>
+<div class="figure">
+<img src="mislabels_files/figure-html/unnamed-chunk-6-1.png" alt="Figure 2: Strict and Lenient Scoring Matricies" width="1920"><p class="caption">
+Figure 2: Strict and Lenient Scoring Matricies
+</p>
+</div>
 </div>
 </div>
 </div>
 <div class="section level2">
 <h2 id="results">Results<a class="anchor" aria-label="anchor" href="#results"></a>
 </h2>
-<p>Number of uncertains in each of the three data sets</p>
-<p>How many genome snp vectors are exactly the same. Histogram of differences</p>
-<p>Same thing for pileups</p>
-<p>conduct experiment, show table</p>
+<p>There are 38 individuals which match another individual over the set of 4,556 genomes exactly in at least one of the 4 SNP vector samples (Figure 3A). Outside of those 38 matches, Figure 3A shows the first percentile, median, mean and third percentile of the number of differences between genome SNP vectors. This is calculated using the ‘strict’ difference matrix above (Figure 2).</p>
+<p>Using one sample of _____ SNPs, there are ____ RNA seq libraries which match one another exactly (Figure 2B). Figure 2B shows the same statistics for these RNA sequence libraries as those described for the genomes in the paragraph above.</p>
+<p>Being unable to differentiate between RNAseq libraries or genomes is obviously a problem. However, the remedy is likely to increase the number of regions over which I sample SNPs. As this is a proof of concept, the goal is not necessarily to unambiguously match libraries to genomes in this experiment, but to show that this method is reasonable and yields consistent results. As such, what we would expect is for the RNAseq libraries which are the same as one another to match the same genomes with the same score, and for those genomes which are the same to match RNA seq libraries with the same score.</p>
+<div class="figure">
+<img src="mislabels_files/figure-html/fig3-1.png" alt="Figure 3: Comparing genome and RNAseq library pileup SNP vectors" width="700"><p class="caption">
+Figure 3: Comparing genome and RNAseq library pileup SNP vectors
+</p>
+</div>
+<p>Figure 4 shows the results of the experiment in matching pile up SNP vectors to genome vectors of the same SNPs using the ‘strict’ scoring matrix. The top scoring (lowest difference ratio) “inferred” subject ID is selected for each rnaseq pileup. For instance, if RNAseq library 1 has a difference ratio of 0 to genome 3, then the ‘inferred’ label for this the RNAseq library currently labelled 1 is 3.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com" class="external-link">patchwork</a></span><span class="op">)</span>
+<span class="va">extract_top_n</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">sample_name</span>, <span class="va">pileup_vectors</span><span class="op">)</span><span class="op">{</span>
+  <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">pileup_vectors</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span>
+                          <span class="va">y</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">pileup_vectors</span><span class="op">[[</span><span class="va">x</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>
+                          <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>
+                            sample <span class="op">=</span> <span class="va">sample_name</span>,
+                            subject <span class="op">=</span> <span class="va">x</span>,
+                            inferred <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span>,
+                            difference_ratio <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>
+  <span class="op">}</span><span class="op">)</span>
+<span class="op">}</span>
+
+<span class="va">out</span> <span class="op">=</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">mapqOver10_no_secondary_results</span><span class="op">)</span>, <span class="op">~</span><span class="fu">extract_top_n</span><span class="op">(</span><span class="va">.</span>, <span class="va">mapqOver10_no_secondary_results</span><span class="op">[[</span><span class="va">.</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>
+
+<span class="va">z</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="st">'rbind'</span>, <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">out</span>, recursive <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">subject</span>, <span class="va">inferred</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>mean_diff_ratio <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">difference_ratio</span><span class="op">)</span>, .groups <span class="op">=</span> <span class="st">'keep'</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">subject</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">mean_diff_ratio</span>, .by_group <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
+  <span class="fu"><a href="https://rdrr.io/pkg/gridExtra/man/tableGrob.html" class="external-link">tableGrob</a></span><span class="op">(</span><span class="op">)</span>
+
+<span class="va">patchwork</span> <span class="op">=</span> <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/wrap_elements.html" class="external-link">wrap_elements</a></span><span class="op">(</span><span class="va">z</span><span class="op">)</span>
+<span class="va">patchwork</span></code></pre></div>
+<p>What we see is that not a single subject is inferred to be the same as that which it is labelled. This is disturbing, since there are ____ samples which have been included that are expected to be correctly labelled.</p>
+<p>I am confident in the SNP strings that I am extracting – I know I am extracting genotypes for certain samples with a given label from the sample metadata, and matching those genotypes to the corresponding RNAseq base. However, the depth over any given base in the RNAseq data is frequently very low. RNA is not as stable as DNA, so possibly there are more cases in which a base is called as heterozygous due to sequencing error. Another possibility is that, as I mentioned above, there simply need to be more SNPs included, though the time to extract ‘genome length’ SNPs and do the processing is such that I hesitate to do so when this method seems to yield poor results already. Finally, it is also possible that there are a lot more mislabels than we expect or hope, though I think this is not likely. If it were the case, presumably there are still more correctly labelled samples than incorrectly labelled samples. I should, therefore, be matching subject to ID more often than chance. I could test this by increasing the number of subjects which I examine.</p>
 </div>
 <div class="section level2">
 <h2 id="conclusion">conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
 </h2>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<p>This project tested whether or not it is possible to extract from individual genomes a set of SNPs over highly and consistently expressed genes which could be used as a ‘finger print’ with which we may match the individual genome to a corresponding RNA sequence library. To test this, I created a database of genotypes for 4,556 samples. I next identified abou 3,688 highly and consistently expressed genes, and created 4 samples of around ___ base pair locations. With these samples, I extracted the consensus base(s) over each of the ___ base locations from 40 RNAseq libraries, ____ of which are known to be mislabeled due to a mismatch between the gene expression pattern and the sex to which the sample is assigned.</p>
+<p>I then calculated the equivalence class based hamming distance (Figure 2) between each RNA sequence library SNP vector against all of the 4,556 genomes in 4 samples, each with SNP vectors of length _____. I also explored how similar the genomes and RNA sequence libraries are within each group (genomes to genomes, RNAseq libraries to RNAseq libraries).</p>
+<p>My finding is that my current method does not, with high confidence, match genomes to RNAseq libraries. It is possible that increasing the amount of data, either by expanding the gene set or by including more RNA seq libraries, could yield results.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
 <span class="va">sample_list</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"sample"</span>, <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">4</span><span class="op">)</span><span class="op">)</span>
 
-<span class="va">filename_map</span> <span class="op">=</span> <span class="fu">read_csv</span><span class="op">(</span><span class="fu">here</span><span class="op">(</span><span class="st">"data/filename_id_subject_mislabel_map.csv"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu">mutate</span><span class="op">(</span>filename <span class="op">=</span> 
+<span class="va">filename_map</span> <span class="op">=</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html" class="external-link">read_csv</a></span><span class="op">(</span><span class="fu">here</span><span class="op">(</span><span class="st">"data/filename_id_subject_mislabel_map.csv"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>filename <span class="op">=</span> 
            <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span>
-             <span class="fu">str_remove_all</span><span class="op">(</span><span class="va">filename</span>, <span class="st">"_visit|.markdup.sorted.pileup"</span><span class="op">)</span>,
-             <span class="st">'.sqlite'</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu">mutate</span><span class="op">(</span>filename <span class="op">=</span> <span class="fu">str_replace</span><span class="op">(</span><span class="va">filename</span>, <span class="st">"_"</span>, <span class="st">"."</span><span class="op">)</span><span class="op">)</span>
+             <span class="fu"><a href="https://stringr.tidyverse.org/reference/str_remove.html" class="external-link">str_remove_all</a></span><span class="op">(</span><span class="va">filename</span>, <span class="st">"_visit|.markdup.sorted.pileup"</span><span class="op">)</span>,
+             <span class="st">'.sqlite'</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>filename <span class="op">=</span> <span class="fu"><a href="https://stringr.tidyverse.org/reference/str_replace.html" class="external-link">str_replace</a></span><span class="op">(</span><span class="va">filename</span>, <span class="st">"_"</span>, <span class="st">"."</span><span class="op">)</span><span class="op">)</span>
 
 
-<span class="va">experiment_res</span> <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">sample_list</span>, <span class="va">conduct_experiment</span>, <span class="va">filename_map</span><span class="op">)</span></code></pre></div>
+<span class="va">experiment_res</span> <span class="op">=</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">sample_list</span>, <span class="va">conduct_experiment</span>, <span class="va">filename_map</span><span class="op">)</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
@@ -1013,27 +346,7 @@ Figure 1: An RNAseq library SNP locations
 <h3 id="supposedly-correctly-labeled">supposedly correctly labeled<a class="anchor" aria-label="anchor" href="#supposedly-correctly-labeled"></a>
 </h3>
 <pre><code>31013 , 1597 , 8161 , 5582 , 15076 , 809 , 15147 , 14639 , 26794 , 13822, 2020,14444 </code></pre>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R">  <span class="va">con</span> <span class="op">=</span> <span class="fu">dbConnect</span><span class="op">(</span><span class="fu">RSQLite</span><span class="fu">::</span><span class="fu"><a href="https://rsqlite.r-dbi.org/reference/SQLite.html" class="external-link">SQLite</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"data/10367282.1.pileup"</span><span class="op">)</span>
-  <span class="va">sql</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"CREATE INDEX idx_pileup 
-ON rnaseq_pileup (chr, pos);"</span><span class="op">)</span>
-  <span class="fu">dbExecute</span><span class="op">(</span><span class="va">con</span>, <span class="va">sql</span><span class="op">)</span>
-  <span class="fu">dbDisconnect</span><span class="op">(</span><span class="va">con</span><span class="op">)</span></code></pre></div>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">sample</span> <span class="op">=</span> <span class="st">'sample3'</span>
-
-<span class="va">snp_df</span> <span class="op">=</span> <span class="fu"><a href="../reference/sample_snp_ranges.html">sample_snp_ranges</a></span><span class="op">(</span><span class="fu">here</span><span class="op">(</span><span class="st">"data/sample_genotype_db.sqlite"</span><span class="op">)</span>, <span class="va">sample</span><span class="op">)</span>
-
-<span class="va">sample_genome_vectors</span> <span class="op">=</span> <span class="fu"><a href="../reference/genome_vectors.html">genome_vectors</a></span><span class="op">(</span><span class="fu">here</span><span class="op">(</span><span class="st">"data/sample_genotype_db.sqlite"</span><span class="op">)</span>, 
-                                       <span class="st">'sample1'</span><span class="op">)</span>
-
-<span class="va">pileup_vector</span> <span class="op">=</span> <span class="fu"><a href="../reference/rnaseq_vector.html">rnaseq_vector</a></span><span class="op">(</span><span class="fu">here</span><span class="op">(</span><span class="st">"data/10367282.1.pileup"</span><span class="op">)</span>, <span class="va">snp_df</span><span class="op">)</span>
-
-<span class="va">dist_mat</span> <span class="op">=</span> <span class="fu"><a href="../reference/equivalence_class_dist_matrix.html">equivalence_class_dist_matrix</a></span><span class="op">(</span>lenient <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-
-<span class="va">out_list3</span> <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">sample_genome_vectors</span>, <span class="va">compare_vectors</span>, <span class="va">pileup_vector</span>, <span class="va">dist_mat</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">out_list3</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">sample_genome_vectors</span><span class="op">)</span></code></pre></div>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">sample</span> <span class="op">=</span> <span class="st">'sample1'</span>
 
 <span class="va">snp_df</span> <span class="op">=</span> <span class="fu"><a href="../reference/sample_snp_ranges.html">sample_snp_ranges</a></span><span class="op">(</span><span class="fu">here</span><span class="op">(</span><span class="st">"data/sample_genotype_db.sqlite"</span><span class="op">)</span>, <span class="va">sample</span><span class="op">)</span>
@@ -1045,19 +358,8 @@ ON rnaseq_pileup (chr, pos);"</span><span class="op">)</span>
 
 <span class="va">dist_mat</span> <span class="op">=</span> <span class="fu"><a href="../reference/equivalence_class_dist_matrix.html">equivalence_class_dist_matrix</a></span><span class="op">(</span>lenient <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
 
-<span class="va">out_list1</span> <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">sample_genome_vectors</span>, <span class="va">compare_vectors</span>, <span class="va">pileup_vector</span>, <span class="va">dist_mat</span><span class="op">)</span>
+<span class="va">out_list1</span> <span class="op">=</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">sample_genome_vectors</span>, <span class="va">compare_vectors</span>, <span class="va">pileup_vector</span>, <span class="va">dist_mat</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">out_list1</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">sample_genome_vectors</span><span class="op">)</span></code></pre></div>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">sample_genotype_db_path</span> <span class="op">=</span> <span class="st">"/home/oguzkhan/class/bioseq/local_data/sample_genotype_db.sqlite"</span>
- 
-<span class="va">sample_list</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"sample"</span>, <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">4</span><span class="op">)</span><span class="op">)</span>
- 
-<span class="va">experiment_res</span> <span class="op">=</span> 
-  <span class="fu">map</span><span class="op">(</span><span class="va">sample_list</span>, 
-      <span class="op">~</span><span class="fu"><a href="../reference/conduct_experiment.html">conduct_experiment</a></span><span class="op">(</span><span class="va">sample_genotype_db_path</span>,
-                          <span class="st">"/home/oguzkhan/class/bioseq/local_data/mapqOver10_no_secondary_databases"</span>,
-                         <span class="va">.</span>,
-                         <span class="va">filename_id_subject_mislabel_map</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 </div>
 </div>
   </div>
@@ -1074,7 +376,7 @@ ON rnaseq_pileup (chr, pos);"</span><span class="op">)</span>
 
       <footer><div class="copyright">
   <p></p>
-<p>Developed by First Last.</p>
+<p>Developed by Mateusiak Chase.</p>
 </div>
 
 <div class="pkgdown">

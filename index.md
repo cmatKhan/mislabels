@@ -1,6 +1,6 @@
 # TL;DR
 
-The report is located here: `vignettes(mislabels)`
+The report is located here: `vignettes("mislabels")`
 
 # Site overview
 

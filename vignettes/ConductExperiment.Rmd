@@ -1,0 +1,88 @@
+---
+title: "ConductExperiment"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ConductExperiment}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE,
+  echo = TRUE
+)
+```
+
+```{r setup}
+library(finalProject)
+```
+
+# Introduction
+
+This script runs the RNAseq pile up vs all genome distance calculation which 
+generates the data for analysis
+
+## SGE script
+
+```{bash}
+#!/bin/bash
+
+#$ -N conduct_expr
+#$ -cwd
+#$ -t 1-2
+#$ -l mem_free=10G
+#$ -q power
+#$ -o /dsgmnt/llfs_external/$USER/logs
+#$ -e /dsgmnt/llfs_external/$USER/logs
+
+root=/dsgmnt/llfs_external/cmateusiak
+
+# activate environment
+source activate $root/conda_envs/r_env
+
+# lookup path
+lookup=$root/lookups/final_project_lookup.txt
+
+# assign each line of lookup to variable
+read pileup_database_dirpath < <(sed -n ${SGE_TASK_ID}p $lookup )
+
+sample_genotype_db_path=$root/sample_genotype_db.sqlite
+
+experiment_output=$pileup_database_dirpath/experiment_res.rds
+
+Rscript $root/scripts/conduct_mislabel_experiment.R $sample_genotype_db_path $pileup_database_dirpath $experiment_output
+
+```
+
+## Rscript
+
+```{r}
+#!/usr/bin/env Rscript
+
+.libPaths(.libPaths()[2])
+
+library(finalProject)
+library(tidyverse)
+
+args = commandArgs(trailingOnly=TRUE)
+
+sample_genotype_db_path  = args[1]
+pileup_database_dirpath = args[2]
+experiment_output  = args[3]
+
+sample_list = paste0("sample", seq(1,4))
+
+experiment_res = 
+  map(sample_list, 
+      ~conduct_experiment(sample_genotype_db_path,
+                         pileup_database_dirpath,
+                         .,
+                         filename_id_subject_mislabel_map))
+
+write_rds(experiment_res, experiment_output)
+
+```
+

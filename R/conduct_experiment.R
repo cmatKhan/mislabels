@@ -158,9 +158,15 @@ conduct_experiment = function(db_path, pileup_database_dir, sample, filename_map
 #
 # sample_list = paste0("sample", seq(1,4))
 #
+# filename_subset =
+#   filter(filename_id_subject_mislabel_map, id %in% c(14909709, 25571309, 26000638,
+#                                                      30872056, 35420405, 37688801,
+#                                                      38477303, 39057203, 41380866,
+#                                                      49365738)) %>% arrange(mislabel)
+#
 # experiment_res =
 #   map(sample_list,
 #       ~conduct_experiment(sample_genotype_db_path,
 #                           "/home/oguzkhan/class/bioseq/local_data/mapqOver10_no_secondary_databases",
 #                           .,
-#                           filename_id_subject_mislabel_map))
+#                           filename_subset))

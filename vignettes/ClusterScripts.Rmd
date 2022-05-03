@@ -1,0 +1,293 @@
+---
+title: "ClusterScripts"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ClusterScripts}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE,
+  echo = TRUE
+)
+```
+
+# Introduction
+
+Below are the SGE and Rscripts which were used to generate the genome and 
+RNAseq databases
+
+# Extract Genotype by genome
+
+## SGE script
+
+```{bash}
+#!/bin/bash
+
+#$ -N make_geno_db
+#$ -cwd
+#$ -l mem_free=5G
+#$ -q normal
+#$ -o /dsgmnt/llfs_external/$USER/logs
+#$ -e /dsgmnt/llfs_external/$USER/logs
+
+# activate environment
+source activate /dsgmnt/llfs_external/cmateusiak/conda_envs/r_env
+
+# lookup path
+lookup_root=/dsgmnt/llfs_external/cmateusiak/lookups
+lookup=$lookup_root/vcf_lookup.txt
+
+db_path=/dsgmnt/llfs_external/cmateusiak/sample_genotype_db.sqlite
+
+Rscript /dsgmnt/llfs_external/cmateusiak/scripts/make_sqlite_db_of_snps.R $lookup $db_path
+
+```
+
+
+## Rscript
+
+```{r}
+#!/usr/bin/env Rscript
+
+.libPaths(.libPaths()[2])
+
+suppressMessages(library(tidyverse))
+suppressMessages(library(Rsamtools))
+suppressMessages(library(VariantAnnotation))
+suppressMessages(library(RSQLite))
+
+add_genotype_table = function(vcf_path, db_path){
+
+  db_conn = dbConnect(RSQLite::SQLite(), db_path)
+
+  message("reading vcf file...")
+
+  vcf_file = VcfFile(file      = vcf_path,
+                     index     = paste0(vcf_path, ".tbi"),
+                     yieldSize = 100)
+
+  vcf = readVcf(vcf_file)
+
+  message("making geno mat...")
+  geno_mat = genotypeToSnpMatrix(vcf, uncertain=TRUE)
+
+  geno_df = t(as(geno_mat$genotype, "character")) %>%
+    as_tibble(rownames = "location") %>%
+    pivot_longer(-location,
+                 names_to = "sample",
+                 values_to = "genotype") %>%
+    mutate(chr     = as.numeric(str_extract(location, "(?<=^chr)\\d+")),
+           bp      = as.numeric(str_extract(location, "(?<=:)\\d+")),
+           ref_alt = str_extract(location, "\\w\\/\\w$")) %>%
+    dplyr::select(sample,chr,bp,ref_alt,genotype)
+
+  message("appending table...")
+  dbAppendTable(db_conn, "sample_genotype", geno_df)
+
+  message("done.")
+  dbDisconnect(db_conn)
+
+}
+
+args = commandArgs(trailingOnly=TRUE)
+
+vcf_list = read_csv(args[1], col_names = FALSE)$X1
+db_path  = args[2]
+
+lapply(vcf_list, add_genotype_table, db_path)
+
+```
+
+
+# Rsamtools pileup
+
+## SGE script
+
+```{bash}
+#!/bin/bash
+
+#$ -N pileup
+#$ -cwd
+#$ -t 1-41
+#$ -q power
+#$ -o /dsgmnt/llfs_external/$USER/logs
+#$ -e /dsgmnt/llfs_external/$USER/logs
+
+root=/dsgmnt/llfs_external/cmateusiak
+
+# activate environment
+source activate $root/conda_envs/r_env
+
+# lookup path
+lookup=$root/lookups/final_project_bam_lookup.txt
+
+# assign each line of lookup to variable
+read bampath < <(sed -n ${SGE_TASK_ID}p $lookup )
+
+out_dir=$root/pileup_out
+
+Rscript $root/scripts/rsamtools_pileup.R $bampath $out_dir
+```
+
+
+## Rscript
+
+```{r}
+#!/usr/bin/env Rscript
+
+.libPaths(.libPaths()[2])
+
+suppressMessages(library(Rsamtools))
+
+pileup_bamfile = function(bam_path, out_dirpath){
+
+  out_name = paste0(tools::file_path_sans_ext(basename(bam_path)), ".pileup")
+
+  out_path = file.path(out_dirpath, out_name)
+
+  bam_file = BamFile(file      = bam_path,
+                     index     = paste0(bam_path, ".bai"))
+
+  sbp = ScanBamParam(flag = scanBamFlag(
+                    isProperPair                = TRUE,
+                    # accept both primary and secondary alignments
+                    # if they align equally well 
+                    isSecondaryAlignment        = NA, 
+                    isSupplementaryAlignment    = FALSE,
+                    isNotPassingQualityControls = FALSE))
+
+  p_param = 
+    PileupParam(max_depth            = 1000, 
+                min_nucleotide_depth = 5, 
+                distinguish_strand   = FALSE,
+                min_base_quality     = 10)
+
+#  bf = open(bam_file)
+
+  message(sprintf("conducting pileup on %s...", basename(bam_file)))
+
+#  repeat {
+#    res = pileup(bf, 
+#                 scanBamParam = sbp, 
+#                 pileupParam = p_param)
+#    message(nrow(res), " rows in result data.frame")
+#      if(nrow(res) == 0L)
+#          break
+#  }
+#  close(bf)
+  res = pileup(bam_file, scanBamParam = sbp, pileupParam = p_param)
+
+  saveRDS(res, out_path)
+}
+
+args = commandArgs(trailingOnly=TRUE)
+
+pileup_bamfile(args[1], args[2])
+```
+
+## make pileup DB
+
+### SGE script
+
+```{bash}
+#!/bin/bash
+
+#$ -N make_pileup_db
+#$ -cwd
+#$ -t 1-41
+#$ -l mem_free=10G
+#$ -q power
+#$ -o /dsgmnt/llfs_external/$USER/logs
+#$ -e /dsgmnt/llfs_external/$USER/logs
+
+root=/dsgmnt/llfs_external/cmateusiak
+
+# activate environment
+source activate $root/conda_envs/r_env
+
+# lookup path
+lookup=$root/pileup_out/lookup.txt
+
+# assign each line of lookup to variable
+read pileup < <(sed -n ${SGE_TASK_ID}p $lookup )
+
+db_path=$root/pileup_out/databases
+
+Rscript /dsgmnt/llfs_external/cmateusiak/scripts/make_sqlite_db_of_pileup.R $pileup $db_path
+```
+
+### Rscript
+
+```{r}
+#!/usr/bin/env Rscript
+
+.libPaths(.libPaths()[2])
+
+suppressMessages(library(tidyverse))
+suppressMessages(library(Rsamtools))
+suppressMessages(library(RSQLite))
+suppressMessages(library(finalProject))
+
+add_pileup_table = function(pileup_path, db_out){
+
+  stopifnot(file.exists(pileup_path))
+  stopifnot(dir.exists(db_out))
+
+  sample = str_extract(basename(pileup_path),"^\\d+")
+  visit  = str_extract(str_remove(basename(pileup_path), 
+                       ".markdup.sorted.pileup"), 
+            '\\d$')
+  
+  db_path = file.path(db_out, 
+                      paste(sample, 
+                            visit, 
+                            'sqlite', 
+                      sep = "."))  
+
+  if(file.exists(db_path)){
+    stop(sprintf("%s database already exists -- not over-writing", basename(db_path)))
+  }
+
+  create_bam_pileup_table(db_path)
+  stopifnot(file.exists(db_path))
+  db_conn = dbConnect(RSQLite::SQLite(), db_path)
+
+  message(sprintf("reading pileup file %s...", basename(pileup_path)))
+  
+  p = readRDS(pileup_path)
+
+  p = p %>% 
+        dplyr::rename(chr = seqnames) %>% 
+        mutate(chr = str_remove(chr, "chr"))
+
+  message("appending table...")
+  dbAppendTable(db_conn, "rnaseq_pileup", p)
+
+  message("indexing table...")
+  index_sql = paste0("CREATE INDEX idx_pileup ON rnaseq_pileup (chr, pos);")
+  dbExecute(db_conn, index_sql)
+
+  message("done.")
+  dbDisconnect(db_conn)
+
+}
+
+args = commandArgs(trailingOnly=TRUE)
+
+pileup  = args[1]
+db_out  = args[2]
+
+add_pileup_table(pileup, db_out)
+
+```
+
+
+
+
+
+

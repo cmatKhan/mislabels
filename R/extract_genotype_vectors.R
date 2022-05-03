@@ -23,6 +23,41 @@ sample_snp_ranges = function(db_path, tablename){
 }
 
 #'
+#' extract unique SNP locations from RNAseq library
+#'
+#' @import GenomicRanges iterators RSQLite
+#' @importFrom dplyr rename
+#'
+#' @inheritParams create_bam_pileup_table
+#' @param tablename name of the rnaseq table. default is rnaseq_pileup
+#'
+#' @export
+sample_snp_loc_from_pileup = function(db_path, tablename = 'rnaseq_pileup'){
+
+  con = dbConnect(RSQLite::SQLite(), db_path)
+
+  sql = paste0(sprintf("SELECT * FROM %s JOIN
+    (SELECT rowid as rid FROM %s
+        WHERE random()", tablename, tablename), " % 10 = 0  -- Reduce rowids by 10x\n",
+        sprintf("ORDER BY random() LIMIT 1000) AS srid
+    ON %s.rowid = srid.rid;", tablename))
+
+  # sql = sprintf("SELECT DISTINCT chr, pos FROM %s", tablename)
+  # sql
+
+  df = dbGetQuery(con, sql) %>%
+    as_tibble() %>%
+    dplyr::select(chr, pos) %>%
+    dplyr::rename(bp = pos) %>%
+    mutate(chr = as.numeric(chr)) %>%
+    mutate(chr = paste0(as.character(chr), ".0"))
+
+  dbDisconnect(con)
+
+  df
+}
+
+#'
 #' generate Snp vectors from each genome
 #' @inheritParams create_bam_pileup_table
 #' @param tablename the table from which to extract the SNPS

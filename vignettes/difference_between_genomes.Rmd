@@ -1,0 +1,133 @@
+---
+title: "difference_between_genomes"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{difference_between_genomes}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE,
+  echo = TRUE
+)
+```
+
+```{r setup}
+library(finalProject)
+```
+
+# Introduction
+
+These are the scripts which compare genome to genome, and RNAseq vector to 
+RNA seq vector
+
+```{r genomes}
+library(tidyverse)
+library(finalProject)
+library(foreach)
+library(doParallel)
+
+
+sample_genome_vectors = genome_vectors("../../local_data/sample_genotype_db.sqlite",
+                                       "sample1")
+
+cl <- makeForkCluster(11)
+registerDoParallel(cl)
+c = foreach(
+  i = seq(1, length(sample_genome_vectors)),
+  .combine = 'c') %dopar% {
+    out = list()
+    for(j in seq(1, length(sample_genome_vectors))){
+    out[j] = finalProject::compare_vectors(sample_genome_vectors[[i]],
+                    sample_genome_vectors[[j]],
+                    equivalence_class_dist_matrix(lenient = FALSE))
+  }
+  unlist(out)
+}
+stopCluster(cl)
+
+sample_genome_dist_mat = readRDS("../../local_data/sample_genome_distance_matrix.rds")
+
+exact_matches = function(row){
+  sum(row == 0)
+}
+
+row_summary_tidy = function(row){
+  broom::tidy(summary(row))
+}
+
+number_of_exact_matches = apply(sample_genome_dist_mat,1,exact_matches)
+
+list_of_row_summaries = apply(sample_genome_dist_mat,1,row_summary_tidy)
+
+row_summaries_df = do.call('rbind', list_of_row_summaries) %>%
+  colMeans()
+
+difference_between_genomes_df = 
+  rbind( tibble(Metric = "Number of Exact Matches", Value = round(sum(number_of_exact_matches > 1))),
+tibble(Metric = names(row_summaries_df), Value = round(row_summaries_df, 3)*840)) %>%
+  filter(Metric != "minimum")
+```
+
+
+```{r rnaseq libraries }
+library(tidyverse)
+library(finalProject)
+library(foreach)
+library(doParallel)
+
+sample_genotype_db = "../../local_data/sample_genotype_db.sqlite"
+
+snp_df = finalProject::sample_snp_ranges(sample_genotype_db,"sample4")
+
+pileup_dbs = list.files("../../local_data/mapqOver10_no_secondary_databases", full.names = TRUE)
+pileup_dbs = pileup_dbs[str_detect(pileup_dbs, "sqlite")]
+
+pileup_sample_vectors = map(pileup_dbs, rnaseq_vector, snp_df)
+
+summary(unlist(map(pileup_sample_vectors, ~sum(. == "Uncertain"))))
+
+cl <- makeForkCluster(11)
+registerDoParallel(cl)
+sample_vec_dist_list = foreach(
+  i = seq(1, length(pileup_sample_vectors)), 
+  .combine = 'c') %dopar% {
+    out = list()
+    for(j in seq(1, length(pileup_sample_vectors))){
+    out[j] = finalProject::compare_vectors(pileup_sample_vectors[[i]], 
+                    pileup_sample_vectors[[j]], 
+                    equivalence_class_dist_matrix(lenient = FALSE))
+  }
+  unlist(out)
+}
+stopCluster(cl)
+
+pileup_dist_mat = matrix(sample_vec_dist_list,
+                         nrow = length(pileup_sample_vectors), 
+                         ncol = length(pileup_sample_vectors))
+
+exact_matches = function(row){
+  sum(row == 0)
+}
+
+row_summary_tidy = function(row){
+  broom::tidy(summary(row))
+}
+
+number_of_exact_matches = apply(pileup_dist_mat,1,exact_matches)
+
+list_of_row_summaries = apply(pileup_dist_mat,1,row_summary_tidy)
+
+row_summaries_df = do.call('rbind', list_of_row_summaries) %>%
+  colMeans()
+
+difference_between_pileup_df = 
+  rbind( tibble(Metric = "Number of Exact Matches", Value = round(sum(number_of_exact_matches > 1))),
+tibble(Metric = names(row_summaries_df), Value = round((row_summaries_df*840),0))) %>%
+  filter(Metric != "minimum")
+```
+

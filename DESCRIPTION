@@ -1,27 +1,32 @@
 Package: finalProject
-Title: What the Package Does (One Line, Title Case)
+Title: Biostrings Algorithms Final Project
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+    person("Mateusiak", "Chase", , "chasem@wustl.edu", role = c("aut", "cre"),
+           comment = c(ORCID = "https://orcid.org/0000-0002-2890-4242 "))
+Description: Conduct experiment to determine whether it is feasible to correctly identify mislabeled RNA sequence libraries by comparing RNA sequence genotypes at known SNP locations in the individual genomes
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
+URL: https://github.com/cmatKhan/mislabels
+BugReports: https://github.com/cmatKhan/mislabels/issues
 LinkingTo: 
     Rcpp
 Imports:
     dplyr,
     GenomicFeatures,
     GenomicRanges,
+    gridExtra,
     iterators,
+    patchwork,
     purrr,
     Rcpp,
     RSQLite,
     stringr,
     tibble,
-    tidyr
+    tidyr,
+    tidyverse
 Suggests: 
     knitr,
     rmarkdown

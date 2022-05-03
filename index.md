@@ -1,6 +1,4 @@
-# TL;DR
-
-The report is located here: `vignettes("mislabels")`
+# TL;DR: [The report is here](https://cmatkhan.github.io/mislabels/articles/mislabels.html)
 
 # Site overview
 
@@ -19,4 +17,4 @@ package to produce the data for analysis.
 
 ## The report
 
-Is located in Articles/mislabels, or linked above in TL;DR
+[Is located in Articles/mislabels]([The report is here](https://cmatkhan.github.io/mislabels/articles/mislabels.html))

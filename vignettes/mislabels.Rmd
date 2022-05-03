@@ -22,6 +22,25 @@ library(gridExtra)
 library(tidyverse)
 ```
 
+# Site overview
+
+## References
+
+This section links to the function definitions in this package. 
+For each function, you may click the function and get a description of the 
+function, paramters, and output (if any). More interestingly, possibly -- you 
+can click the link "source: R/<function_name>" to view the source code 
+of the function.
+
+## Articles
+
+This section has supplementary work, mostly code which runs the functions in this 
+package to produce the data for analysis.
+
+## The report
+
+Is below. 
+
 # Introduction
 
 The Long Life Family Study is a genetics/genomics study of families 

@@ -84,10 +84,10 @@ sample_genotype_db = "../../local_data/sample_genotype_db.sqlite"
 
 snp_df = finalProject::sample_snp_ranges(sample_genotype_db,"sample4")
 
-pileup_dbs = list.files("../../local_data/mapqOver10_no_secondary_databases", full.names = TRUE)
+pileup_dbs = list.files("/mnt/provinceCluster/pileup_out/databases", full.names = TRUE)
 pileup_dbs = pileup_dbs[str_detect(pileup_dbs, "sqlite")]
 
-pileup_sample_vectors = map(pileup_dbs, rnaseq_vector, snp_df)
+pileup_sample_vectors = map(c("../../local_data/mapqOver10_no_secondary_databases/49365738.1.sqlite"), rnaseq_vector, snp_df)
 
 summary(unlist(map(pileup_sample_vectors, ~sum(. == "Uncertain"))))
 

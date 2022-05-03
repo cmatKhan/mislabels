@@ -22,25 +22,6 @@ library(gridExtra)
 library(tidyverse)
 ```
 
-# Site overview
-
-## References
-
-This section links to the function definitions in this package. 
-For each function, you may click the function and get a description of the 
-function, paramters, and output (if any). More interestingly, possibly -- you 
-can click the link "source: R/<function_name>" to view the source code 
-of the function.
-
-## Articles
-
-This section has supplementary work, mostly code which runs the functions in this 
-package to produce the data for analysis.
-
-## The report
-
-Is below. 
-
 # Introduction
 
 The Long Life Family Study is a genetics/genomics study of families 
@@ -470,16 +451,21 @@ experiment_res = map(sample_list, conduct_experiment, filename_map)
 
 https://seqqc.wordpress.com/2015/03/10/calculate-nucelotide-frequency-with-rsamtools-pileup/
 
+# Misc
 
-```{r, echo = FALSE}
+
 ## mislabels
 
-# 4307 , 1294 , 11221 , 20686 , 20903 , 26715 , 21389 , 25785 , 2333 , 6190 , 6099 , 11185 
+```
+4307 , 1294 , 11221 , 20686 , 20903 , 26715 , 21389 , 25785 , 2333 , 6190 , 6099 , 11185 
+```
 
 ## supposedly correctly labeled
 
-# 31013 , 1597 , 8161 , 5582 , 15076 , 809 , 15147 , 14639 , 26794 , 13822, 2020,14444 
-
+```
+31013 , 1597 , 8161 , 5582 , 15076 , 809 , 15147 , 14639 , 26794 , 13822, 2020,14444 
+```
+```{r}
 sample = 'sample1'
 
 snp_df = sample_snp_ranges(here("data/sample_genotype_db.sqlite"), sample)

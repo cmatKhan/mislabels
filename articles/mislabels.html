@@ -353,34 +353,6 @@ Figure 3: Comparing genome and RNAseq library pileup SNP vectors
 </h2>
 <p><a href="https://seqqc.wordpress.com/2015/03/10/calculate-nucelotide-frequency-with-rsamtools-pileup/" class="external-link uri">https://seqqc.wordpress.com/2015/03/10/calculate-nucelotide-frequency-with-rsamtools-pileup/</a></p>
 </div>
-<div class="section level2">
-<h2 id="misc">Misc<a class="anchor" aria-label="anchor" href="#misc"></a>
-</h2>
-<div class="section level3">
-<h3 id="mislabels">mislabels<a class="anchor" aria-label="anchor" href="#mislabels"></a>
-</h3>
-<pre><code>4307 , 1294 , 11221 , 20686 , 20903 , 26715 , 21389 , 25785 , 2333 , 6190 , 6099 , 11185 </code></pre>
-</div>
-<div class="section level3">
-<h3 id="supposedly-correctly-labeled">supposedly correctly labeled<a class="anchor" aria-label="anchor" href="#supposedly-correctly-labeled"></a>
-</h3>
-<pre><code>31013 , 1597 , 8161 , 5582 , 15076 , 809 , 15147 , 14639 , 26794 , 13822, 2020,14444 </code></pre>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">sample</span> <span class="op">=</span> <span class="st">'sample1'</span>
-
-<span class="va">snp_df</span> <span class="op">=</span> <span class="fu"><a href="../reference/sample_snp_ranges.html">sample_snp_ranges</a></span><span class="op">(</span><span class="fu">here</span><span class="op">(</span><span class="st">"data/sample_genotype_db.sqlite"</span><span class="op">)</span>, <span class="va">sample</span><span class="op">)</span>
-
-<span class="va">sample_genome_vectors</span> <span class="op">=</span> <span class="fu"><a href="../reference/genome_vectors.html">genome_vectors</a></span><span class="op">(</span><span class="fu">here</span><span class="op">(</span><span class="st">"data/sample_genotype_db.sqlite"</span><span class="op">)</span>, 
-                                       <span class="va">sample</span><span class="op">)</span>
-
-<span class="va">pileup_vector</span> <span class="op">=</span> <span class="fu"><a href="../reference/rnaseq_vector.html">rnaseq_vector</a></span><span class="op">(</span><span class="fu">here</span><span class="op">(</span><span class="st">"data/10367282.1.pileup"</span><span class="op">)</span>, <span class="va">snp_df</span><span class="op">)</span>
-
-<span class="va">dist_mat</span> <span class="op">=</span> <span class="fu"><a href="../reference/equivalence_class_dist_matrix.html">equivalence_class_dist_matrix</a></span><span class="op">(</span>lenient <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-
-<span class="va">out_list1</span> <span class="op">=</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">sample_genome_vectors</span>, <span class="va">compare_vectors</span>, <span class="va">pileup_vector</span>, <span class="va">dist_mat</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">out_list1</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">sample_genome_vectors</span><span class="op">)</span></code></pre></div>
-</div>
-</div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

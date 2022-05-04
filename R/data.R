@@ -7,6 +7,10 @@
 #' results of the most stringent filter on the pileup
 "mapqOver10_no_secondary_results"
 
+#' results from the more lenient filter (the one which allows all primary
+#' and secondary mapping with no mapq filter)
+"lenient_filter_res"
+
 #' plot comparing number of uncertains by position
 "filter_comparison_plt"
 

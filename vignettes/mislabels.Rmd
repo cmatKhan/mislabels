@@ -22,26 +22,7 @@ library(gridExtra)
 library(tidyverse)
 ```
 
-# Site overview
-
-## References
-
-This section links to the function definitions in this package. 
-For each function, you may click the function and get a description of the 
-function, paramters, and output (if any). More interestingly, possibly -- you 
-can click the link "source: R/<function_name>" to view the source code 
-of the function.
-
-## Articles
-
-This section has supplementary work, mostly code which runs the functions in this 
-package to produce the data for analysis.
-
-## The report
-
-Is below. 
-
-# Introduction
+# Abstract
 
 The Long Life Family Study is a genetics/genomics study of families 
 who are identified by health records as long-lived. The study tracks family 
@@ -97,6 +78,75 @@ mislabels also pass these thresholds), and are not known mislabels.
 Thus, there is a total of twenty RNA sequence libraries in this project, 
 which will be compared against 4,556 individual genomes.
 
+# Literature Review
+
+[This paper](https://academic.oup.com/nar/article/47/21/e136/5566588#) describes 
+a method of reconstructing a family pedigree from RNA sequence data. This has 
+nearly no novel methods -- they align the RNA seq reads, do some filtering, which 
+I will address shortly, make VCF files from the output of Samtools pileup, also 
+addressed shortly, and then use [Plink](https://zzz.bwh.harvard.edu/plink/), 
+an established whole genome association software package, to create an 
+identity by descent (IBD) matrix. The authors use the IBD matrix from Plink to 
+infer the pedigree. 
+
+First, the filtering. The authors suggest stringent filters on the RNA sequence 
+libraries. These filters are similar to those used for estimating gene expression 
+(packages like HTSeq or Salmon). However, in applying these filters, I discovered 
+that they are unnecessarily stringent, and thus reduces the number of bases from 
+which we may infer the sample's genotype. For instance, for counting reads 
+over a gene, it is reasonable to remove reads which multi-map with equal confidence. 
+However, for this purpose, if the read aligns perfectly to two or more positions, 
+it should be used at both positions to add counts to a given base. We aren't 
+comparing how many counts a given base has in this application -- we just need 
+to know about what base occurs at a given position in a given sample, and 
+well aligned multi-maps do tell us that. Similarly, the bioinformatics community 
+has largely decided (at least in the RNA seq world) that you should not remove 
+inferred duplicates (too hard to tell what is a PCR duplicate and what is a 
+biological duplicate). Like multi-maps, if these possible duplicates align well, 
+we should use that information. Finally, and there are more details on this 
+in the 'nitty gritty' section below, setting a mapping quality threshold (MAPQ) 
+causes the multimaps to be removed, since the MAPQ score is reduced if a read 
+maps to multiple locations. 
+
+In summary, this paper suggests a reasonable workflow for inferring pedigree 
+from RNA sequence libraries. But, their suggested filters are wrong.
+
+[This paper](https://academic.oup.com/bioinformatics/article/32/17/2699/2450735?login=true)
+describes a program which the authors call BAM-matcher. This is the closest published 
+work which I could find which describes a solution to a problem similar to the one 
+I outline in the Introduction. The authors describe a very similar method to mine, 
+but they match alignment files (BAMs) to other alignment files,
+as opposed to extract data from Variant Call Files (VCF) match to data from BAM 
+files. I wish to use VCF files, since they a) already exist and b) possess 
+quality metrics on each SNP site already. Consider the VCF files as the result 
+of thousands of BAM files -- I believe that using this method on a problem 
+of this scale would take quite some time, but by using the VCF files, I reduce 
+the data processing up front, since it is already done.  
+
+This paper is a significant improvement 
+on my method, though, as in the supplement it does detail the 
+probability/statistics of matching a certain genotype at a certain site.
+
+# Method comparison
+
+I was not able to complete a head-on comparison for either of these methods. 
+The data demands are far beyond that of a single local computer and I didn't feel 
+comfortable taking more than a day of cluster time with the amount of 
+resources it would take to do a reasonable comparison.  
+
+My method, on the other hand, takes a total of 2 hours to process (on a cluster) 
+the genome VCF and RNA seq BAMs into SQLite databases. I then index the tables, 
+which allows me to very quickly extract data and do experiments. The all-by-all 
+hamming distance comparison is time consuming, but it can be done in parallel. 
+On a laptop with 12 threads, it takes about an hour.  
+
+In terms of the ability to do exploratory data analysis (some of which is 
+detailed below), this method is superior to the published methods. 
+Of course, I have not thoroughly justified the statistics like the authors 
+have in the [BAM-Matcher](https://academic.oup.com/bioinformatics/article/32/17/2699/2450735?login=true) 
+paper. But, in terms of both scaling and usability, surprisingly, this is not a 
+bad implementation.
+
 ## Nitty Gritty
 
 ### Data Preparation
@@ -111,16 +161,17 @@ possible.
 
 I initially tried to use [Plink](https://zzz.bwh.harvard.edu/plink/), 
 which seems to be commonly used among the geneticists at Wash U. However, 
-for my purposes, this did not provide the quick access to the data that that I 
+for my purposes, this did not provide the quick access to the data that I 
 needed. Simply extracting a SNP matrix (dimensions SNP by samples) ran for more 
-than a day, and the output format was not useful.  
+than a day without completing, and the output format (I experimented on a subset 
+to see what it would look like) was not useful (just a huge plain text tsv).  
 
 The solution I finally arrived at was to extract the data from the VCF files 
 into a [SQLite database](https://sqlite.org/index.html). 
 Using 
 [VariantAnnotation](https://bioconductor.org/packages/release/bioc/html/VariantAnnotation.html), 
-an R package, I could fine tune, for speed, how the data streams into my 
-parsing program. I could also pre-filter the data so that only high quality 
+an R package. Using this, I could fine tune, for speed, how the data streams into 
+my parsing program. I could also pre-filter the data so that only high quality 
 SNPs are stored.
 
 The table which stores the genome genotype data is called `sample_genotype`, 
@@ -135,7 +186,8 @@ and B/B for homozygous alternate). This table is indexed on `sample`, `chr` and
 One useful feature of using a database framework is that I can also create 
 views, or virtual tables defined by a SQL query of other tables in the database, 
 which define the randomly sampled sets of loci to be used to match genomes to 
-RNA sequence libraries. For example, the SQL command which creates the first sample looks like this:
+RNA sequence libraries. For example, the SQL command which creates the first sample 
+looks like this:
 
 ```
 DROP VIEW IF EXISTS "main"."sample1"; 
@@ -153,49 +205,16 @@ For each RNA sequence library, I used
 [Rsamtools](https://bioconductor.org/packages/release/bioc/html/Rsamtools.html), 
 an R wrapper for
 [Samtools](http://www.htslib.org/doc/samtools-mpileup.html), 
-to 'pileup' the alignments from the bam files. Only those reads which met 
-the criteria described below were retained in the pileup.
-
-```{r}
-# these are the paramters used as input to Rsamtools pileup. scanBamParam 
-# and pileupParam are helper functions in Rsamtools which read SAM/BAM flags
-# and tags and aid in filtering the alignments
-
-sbp = 
-  ScanBamParam(
-    flag = 
-                  # only count reads for which both R1 and R2 align properly 
-                  # (these are reverse strand library, so R1 must align to the 
-                  # reverse complement of the reference, while R2 aligns on the 
-                  # forward strand with some specified overlap)
-      scanBamFlag(isProperPair                = TRUE, 
-                  # only accept primary alignments
-                  isSecondaryAlignment        = FALSE,
-                  isSupplementaryAlignment    = FALSE,
-                  # only accept alignments which pass all aligner quality 
-                  # metrics
-                  isNotPassingQualityControls = FALSE))
-
-p_param = 
-              # only count to a depth of 1000 over any given locus (for speed, 
-              # and it turned out that few individual bases had anywhere close 
-              # to this depth)
-  pileupParam(max_depth            = 1000, 
-              # only retain in the output bases which have a depth of at least 5
-              # reads
-              min_nucleotide_depth = 5,
-              # count reads from both strands over a given locus
-              distinguish_strand   = FALSE,
-              # only accept reads with a MAPQ (alignment quality) of at least 10
-              min_mapq             = 10,
-              # only accept reads with a sequencer quality score of at least 10
-              min_base_quality     = 10)
-```
+to 'pileup' the alignments from the BAM files. 
 
 ### Sample preparation
 
-The genome SNP variants are sampled from the previously identified 4000 highly and 
-consistently expressed genes. the result, for one sample, looks like so:
+The genome SNP variants are sampled from 4000 highly and consistently expressed loci. 
+to reduce the time for each distance calculation, rather than using all 4000, 
+I created 4 samples of 1,900 genes drawn from the 4,000 genes. I then intersected 
+those samples with the genome SNP database. The result of this is a list of SNPS 
+which occur in the sampled regions. For sample1, for example, there are 840 high 
+confidence SNPS. 
 
 ```
 > snp_df
@@ -214,9 +233,8 @@ consistently expressed genes. the result, for one sample, looks like so:
 10 12.0  12500914
 # … with 830 more rows
 ```
-Sampling 1900 high expression genes results, for sample1, in 840 high confidence 
-SNPS. A subset of a SNP vector (this one for subject labelled '8') looks like 
-this:
+Using this, I then create a SNP vector for each of the 4,556 individual genomes. 
+A subset of one SNP vector looks like this, where '8' is the subject ID:
 ```
 > sample_genome_vectors$`8`
   [1] "G"         "G"         "G"         "C"         "G"        
@@ -230,7 +248,10 @@ this:
  [41] "C"         "C"         "A"         "G"         "T" 
  ...
 ```
-An RNA sequence library vector looks like this:
+Using the exactly bp coordinates of these SNPs, I then extract the consensus 
+base at the same location from each of the RNA sequence libraries. For any location 
+which does not have enough depth due to coverage or quality filters, the value 
+"Uncertain" is entered:
 ```
 > pileup_vector
   [1] "G"         "G"         "G"         "C"         "G"        
@@ -244,8 +265,9 @@ An RNA sequence library vector looks like this:
  [41] "C"         "Uncertain" "Uncertain" "Uncertain" "Uncertain"
  ...
 ```
-A note here -- I was and am concerned about the number of uncertain bases. So, I
-visualized this locus in this sample:
+After generating this data, I was concerned at how many "Uncertain" positions 
+there are, especially over highly expressed genes. Thus, I explored the alignments 
+themselves:
 
 ```{r echo=FALSE, eval = TRUE, fig.cap="Figure 1: An RNAseq library SNP locations", out.width = '75%'}
 knitr::include_graphics("snp_location.png")
@@ -267,47 +289,35 @@ may be as good as this one.
 
 In thinking about this, I realized that the more stringent MAPQ filter on the 
 pileup step, while reasonable for something like RNA sequencing, is not 
-necessary for this purpose.  A high quality multi-map does provide evidence of a 
-given base's identity. In fact, it increases confidence. Thus, I should only set 
-a base_quality score, and accept both primary and secondary mappings which map 
-as well as the primary mapping.
+necessary for this purpose.  A high quality multi-map __does__ provide evidence of a 
+given base's identity. In fact, it increases confidence. Thus, I decided to re-do 
+the pileup and to only set base_quality score. Furthermore, I decided to count 
+both primary and secondary alignments. This marks a significant departure from 
+the 'Inferring identity ...' paper.
 
-So, I generated a second data set with the revised parameters below:
+The result is fewer 'Uncertain' base locations in the RNA sequence library pileups (Figure 1).
 
-```{r}
-sbp = 
-  ScanBamParam(
-    flag = 
-      scanBamFlag(isProperPair                = TRUE, 
-                  # accept both primary and secondary alignments which align 
-                  # as well as the primary
-                  isSecondaryAlignment        = TRUE,
-                  # But exclude poor secdonary alignments
-                  isSupplementaryAlignment    = FALSE,
-                  # only accept alignments which pass all aligner quality 
-                  # metrics
-                  isNotPassingQualityControls = FALSE))
-
-p_param =
-  PileupParam(max_depth            = 250, 
-              min_nucleotide_depth = 5,
-              distinguish_strand   = FALSE,
-              min_base_quality     = 10)
-
-```
-
-The result is significantly fewer 'Uncertain' base locations in the RNA sequence 
-library pileups.
-
-```{r, eval = TRUE, fig.height=5, fig.width=10}
+```{r, eval = TRUE, fig.height=5, fig.width=10, fig.cap="Figure 1: Comparing the number of uncertain bases with different filters"}
 filter_comparison_plt
 ```
 
+Figure 1 shows the distribution of "Certain Genotypes", by which I mean genotypes 
+which have adequate coverage and alignment quality in the RNA seq, which are 
+identified as SNPs in the VCFs, and which are in highly and consistently expressed 
+gene regions. Using my filters, which counts bases in reads in all good alignments, 
+regardless of whether or not the read is identified as a multimap, significantly 
+increases the number of "certain genotypes". The average number in any given SNP 
+vector in any given sample, is slightly less than 250. This is the effective length 
+of any SNP vector, and it is only across these "certain genotypes" that the 
+equivalence class based hamming distance (see below) is calculated. The denominator 
+for the "difference ratio" (also below) is the number of 'certain bases' in a given 
+SNP vector.
+
 ### Distance
 
-The hamming distance between an RNA sequence library SNP vector and an 
-individual's genome SNP vector is calculated using one of the two 'scoring 
-matrices'. Strict only accepts exact matches where all of the homozygous 
+The 'equivalence class based hamming distance' between an RNA sequence library 
+SNP vector and an individual's genome SNP vector is calculated using one of the 
+two scoring matrices below. Strict only accepts exact matches where all of the homozygous 
 bases match each other, and homozygous match in either order, i.e. A/T == T/A.  
 
 The lenient scoring matrix, on the other hand, allows matches between homozygous 
@@ -334,12 +344,22 @@ patchwork = wrap_elements(panel = strict_mat_vis) + lenient_mat_vis+
 patchwork
 ```
 
+I experimented with both matricies, and I ultimately chose the 'strict' 
+matrix for all of the following results.
+
 # Results
 
 There are 38 individuals which match another individual over the set of 4,556 
-genomes exactly in at least one of the 4 SNP vector samples (Figure 3A). 
-Outside of those 38 matches, Figure 3A shows the first percentile, median, 
-mean and third percentile of the number of differences between genome SNP 
+genomes exactly in at least one of the 4 SNP vector samples (Figure 3A). I 
+am not sure what to expect, but this seems incredibly high, even for family 
+data. There are samples included in this data set which are not actually part 
+of the study, i.e. family members who didn't submit to the 3 visits and numerous 
+measurements, but did allow their genome to be assembled to provide full pedigree 
+data. Possibly this set, which I used to construct the SNP database, also includes 
+some control samples.
+
+Outside of those 38 exact matches, Figure 3A shows the first percentile, median, 
+mean, third percentile and maximum number of differences between genome SNP 
 vectors. This is calculated using the 'strict' difference matrix above (Figure 2).  
 
 Using one sample of _____ SNPs, there are ____ RNA seq libraries which match 
@@ -355,19 +375,19 @@ what we would expect is for the RNAseq libraries which are the same as one
 another to match the same genomes with the same score, and for those genomes 
 which are the same to match RNA seq libraries with the same score.
 
-```{r fig3, eval = TRUE, echo = FALSE, fig.cap="Figure 3: Comparing genome and RNAseq library pileup SNP vectors"}
+```{r, fig3, eval = TRUE, echo = FALSE,  fig.width=10, fig.cap="Figure 3: Comparing genome and RNAseq library pileup SNP vectors"}
 
 
 diff_genomes_grob = difference_between_genomes_df %>% 
+  mutate(Value = round(Value, 0))%>%
   tableGrob()
 
-diff_pileup_grob = equivalence_class_dist_matrix(lenient = TRUE) %>%
-  as_tibble(rownames = "genotype") %>%
+RNAseq_diference_btwn_pileup_grob = RNAseq_diference_btwn_pileup_df %>% 
+  mutate(Value = round(Value, 0))%>%
   tableGrob()
 
 
-
-patchwork = wrap_elements(panel = diff_genomes_grob) + diff_pileup_grob+ 
+patchwork = wrap_elements(panel = diff_genomes_grob) + RNAseq_diference_btwn_pileup_grob +
   plot_annotation(tag_levels = 'A')
 
 patchwork
@@ -381,7 +401,7 @@ rnaseq pileup. For instance, if RNAseq library 1 has a difference ratio of 0
 to genome 3, then the 'inferred' label for this the RNAseq library currently 
 labelled 1 is 3.
 
-```{r, fig.height=12, fig.width=5}
+```{r, eval = TRUE, fig.height=12, fig.width=5,  fig.cap="Figure 4: RNA seq vs all genomes results"}
 library(patchwork)
 extract_top_n = function(sample_name, pileup_vectors){
   lapply(names(pileup_vectors), function(x) {
@@ -427,7 +447,25 @@ more correctly labelled samples than incorrectly labelled samples. I should,
 therefore, be matching subject to ID more often than chance. I could test this 
 by increasing the number of subjects which I examine.
 
-# conclusion
+# Time and space
+
+The raw individual genome data is about 1TB. As a SQLite database, it is 
+reduced to 5GB. I sampled 40 RNA seq libraries. The SQLite databases which 
+result from the 'pileup' are about 5GB each. Preprocessing, on a cluster, 
+takes a total of 1 to 2 hours depending on how quickly the jobs are scheduled. 
+Reading the data into the databases, which is O(N) in the size of the file, 
+takes about 30 minutes for each file. Indexing the databases is included in 
+this time.  
+
+Once the databases are created, extracting data, due to the indicies, is fast. 
+Calculating the hamming distance is O(MNS) where M is the number of RNA seq libraries, 
+N is the number of genomes, and S is the length of the SNP vector. The result is 
+a square matrix where the dimensions are the number of RNAseq libraries vs the 
+number of genomes, and the entries are the distance ratio between the SNP vectors. 
+In this case, the number of computations are `40*4556*1000`. In parallel on a laptop, 
+this takes about an hour.
+
+# Conclusion
 
 This project tested whether or not it is possible to extract from individual 
 genomes a set of SNPs over highly and consistently expressed genes which could 

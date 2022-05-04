@@ -79,6 +79,7 @@ library(tidyverse)
 library(finalProject)
 library(foreach)
 library(doParallel)
+library(finalProject)
 
 sample_genotype_db = "../../local_data/sample_genotype_db.sqlite"
 
@@ -87,7 +88,7 @@ snp_df = finalProject::sample_snp_ranges(sample_genotype_db,"sample4")
 pileup_dbs = list.files("/mnt/provinceCluster/pileup_out/databases", full.names = TRUE)
 pileup_dbs = pileup_dbs[str_detect(pileup_dbs, "sqlite")]
 
-pileup_sample_vectors = map(c("../../local_data/mapqOver10_no_secondary_databases/49365738.1.sqlite"), rnaseq_vector, snp_df)
+pileup_sample_vectors = map(pileup_dbs, rnaseq_vector, snp_df)
 
 summary(unlist(map(pileup_sample_vectors, ~sum(. == "Uncertain"))))
 
@@ -97,9 +98,9 @@ sample_vec_dist_list = foreach(
   i = seq(1, length(pileup_sample_vectors)), 
   .combine = 'c') %dopar% {
     out = list()
-    for(j in seq(1, length(pileup_sample_vectors))){
-    out[j] = finalProject::compare_vectors(pileup_sample_vectors[[i]], 
-                    pileup_sample_vectors[[j]], 
+  for(j in seq(1, length(pileup_sample_vectors))){
+    out[j] = finalProject::compare_vectors(pileup_sample_vectors[[i]],
+                    pileup_sample_vectors[[j]],
                     equivalence_class_dist_matrix(lenient = FALSE))
   }
   unlist(out)
@@ -125,9 +126,41 @@ list_of_row_summaries = apply(pileup_dist_mat,1,row_summary_tidy)
 row_summaries_df = do.call('rbind', list_of_row_summaries) %>%
   colMeans()
 
-difference_between_pileup_df = 
+RNAseq_diference_btwn_pileup_df = 
   rbind( tibble(Metric = "Number of Exact Matches", Value = round(sum(number_of_exact_matches > 1))),
 tibble(Metric = names(row_summaries_df), Value = round((row_summaries_df*840),0))) %>%
   filter(Metric != "minimum")
+```
+
+# counting non uncertain positions
+
+```{r}
+pileup_dbs = list.files("/mnt/provinceCluster/pileup_out/databases", full.names = TRUE)
+pileup_dbs = pileup_dbs[str_detect(pileup_dbs, "sqlite")]
+
+lenient_filter = map(pileup_dbs, rnaseq_vector, snp_df)
+
+lenient_filter_res = unlist(map(lenient_filter, ~sum(. != "Uncertain")))
+```
+
+```{r}
+pileup_dbs = list.files("../../local_data/mapqOver10_no_secondary_databases", full.names = TRUE)
+pileup_dbs = pileup_dbs[str_detect(pileup_dbs, "sqlite")]
+
+strict_filter = map(pileup_dbs, rnaseq_vector, snp_df)
+
+strict_filter_res = unlist(map(strict_filter, ~sum(. != "Uncertain")))
+```
+
+```{r}
+filter_comparison_plt = tibble(
+  "Paper Filter" = unlist(strict_filter_res),
+  "My Filter"    = unlist(sample(lenient_filter_res, 20, replace = FALSE))
+) %>%
+  pivot_longer(everything(), names_to = "Filter", values_to = "Number of Certain Genotypes") %>%
+  ggplot(aes(Filter,`Number of Certain Genotypes`))+
+    geom_boxplot() +
+  ggtitle("Effect of BAM Filter Settings") +
+  theme(text = element_text(size = 15))
 ```
 

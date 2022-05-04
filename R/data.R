@@ -9,3 +9,6 @@
 
 #' plot comparing number of uncertains by position
 "filter_comparison_plt"
+
+#' comparing RNAseq vectors to quantify similarity/difference btwn snp locations
+"RNAseq_diference_btwn_pileup_df"

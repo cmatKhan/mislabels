@@ -106,6 +106,8 @@ genome_vectors = function(db_path,tablename){
 #'
 #' get vector of consensus bases over a given set of SNPs in an RNAseq library
 #'
+#' @import dplyr RSQLite stringr
+#'
 #' @param db_path path to an RNAseq library pileup sqlite database
 #' @param snp_df path to the snp dataframe (see function)
 #' @param tablename the table from which to extract the SNPS
@@ -140,7 +142,10 @@ rnaseq_vector = function(db_path, snp_df, tablename = "rnaseq_pileup"){
   snp_df %>%
     left_join(df, by = c('chr' = 'chr', 'bp' = 'pos')) %>%
     group_by(chr, bp) %>%
+    arrange(count, .by_group = TRUE) %>%
     summarize(geno = paste(nucleotide, collapse = "/"), .groups = 'keep') %>%
+    # only the top 2 expressed bases, in the event there are more than 2
+    mutate(geno = substr(geno,1,3)) %>%
     mutate(geno = str_replace(geno, "NA", "Uncertain")) %>%
     pull(geno)
 

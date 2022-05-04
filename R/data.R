@@ -11,4 +11,7 @@
 "filter_comparison_plt"
 
 #' comparing RNAseq vectors to quantify similarity/difference btwn snp locations
+"difference_between_genomes_df"
+
+#' comparing RNAseq vectors to quantify similarity/difference btwn snp locations
 "RNAseq_diference_btwn_pileup_df"

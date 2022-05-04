@@ -31,6 +31,9 @@
     <loc>/index.html</loc>
   </url>
   <url>
+    <loc>/reference/RNAseq_diference_btwn_pileup_df.html</loc>
+  </url>
+  <url>
     <loc>/reference/add_genotype_table.html</loc>
   </url>
   <url>
@@ -49,7 +52,16 @@
     <loc>/reference/create_sample_geno_db.html</loc>
   </url>
   <url>
+    <loc>/reference/difference_between_genomes_df.html</loc>
+  </url>
+  <url>
     <loc>/reference/equivalence_class_dist_matrix.html</loc>
+  </url>
+  <url>
+    <loc>/reference/filename_id_subject_mislabel_map.html</loc>
+  </url>
+  <url>
+    <loc>/reference/filter_comparison_plt.html</loc>
   </url>
   <url>
     <loc>/reference/genome_vectors.html</loc>
@@ -64,7 +76,13 @@
     <loc>/reference/index.html</loc>
   </url>
   <url>
+    <loc>/reference/mapqOver10_no_secondary_results.html</loc>
+  </url>
+  <url>
     <loc>/reference/rnaseq_vector.html</loc>
+  </url>
+  <url>
+    <loc>/reference/sample_snp_loc_from_pileup.html</loc>
   </url>
   <url>
     <loc>/reference/sample_snp_ranges.html</loc>

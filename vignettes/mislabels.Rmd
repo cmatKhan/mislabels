@@ -565,9 +565,9 @@ experiment_res = map(sample_list, conduct_experiment, filename_map)
 
 # References
 
-[calculate-nucelotide-frequency-with-rsamtools-pileup](https://seqqc.wordpress.com/2015/03/10/calculate-nucelotide-frequency-with-rsamtools-pileup/)
-[Assessment of kinship detection using RNA-seq data](https://academic.oup.com/nar/article/47/21/e136/5566588#)
-[BAM-matcher: a tool for rapid NGS sample matching](https://academic.oup.com/bioinformatics/article/32/17/2699/2450735?login=true)
+[calculate-nucelotide-frequency-with-rsamtools-pileup](https://seqqc.wordpress.com/2015/03/10/calculate-nucelotide-frequency-with-rsamtools-pileup/)  
+[Assessment of kinship detection using RNA-seq data](https://academic.oup.com/nar/article/47/21/e136/5566588#)  
+[BAM-matcher: a tool for rapid NGS sample matching](https://academic.oup.com/bioinformatics/article/32/17/2699/2450735?login=true)  
 
 ```{r, echo = FALSE}
 ## mislabels
